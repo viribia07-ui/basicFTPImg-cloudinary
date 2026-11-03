@@ -23,13 +23,13 @@ export default function UploadPage() {
             icon={<FaServer />}
             endpoint='http://localhost:5000/api/upload/ftp'
           />
-          <FileList  />
+          <FileList  title='FTP Files' endpoint='http://localhost:5000/api/files/ftp'/>
         </div>
         <div className="column">
           <FileUpload
             title='Cloudinary Image Upload'
             icon={<FaCloud />}
-            endpoint='http://localhost:5000/api/upload/ftp'
+            endpoint='http://localhost:5000/api/upload/cloudinary'
           />
           <FileList
 

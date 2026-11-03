@@ -11,11 +11,22 @@ import { toast } from 'react-toastify';
  * @returns {JSX.Element}
  */
 export default function FileList({ title, endpoint, refreshKey, imageOnly }) {
+  const [files, setFiles] = useState([])
 
+  useEffect(()=>{
+    fetch(endpoint)
+    .then(console.log)
+    .catch(console.warn)
+  }, [endpoint])
 
   return (
     <section className="card">
-
+      <h2>{title}</h2>
+      <ul className='file-list'>
+        {files.map(file => <li key={file}>
+          {file}
+        </li>)}
+      </ul>
     </section>
   );
 }
