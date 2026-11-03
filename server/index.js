@@ -99,6 +99,23 @@ const ftpAccess = (client) =>
 
 /** GET /api/files/ftp - lists files in the FTP remote dir as [{ name, size }]. */
 app.get('/api/files/ftp', async (_req, res) => {
+  
+  const client = new Client()
+  await client.access({
+    host: "192.168.56.1",
+    port: 21,
+    usert: "tester",
+    password: "password",
+    secure: "true"
+  })
+
+  const list = await client.list()
+  if (list) {
+    await client.close()
+    res.status(200).json({list})
+  } else{
+    res.status(500).json({error: "FTP  list failed: "})
+  }
 
     res.status(500).json({ error: 'FTP list failed: '  });
 
