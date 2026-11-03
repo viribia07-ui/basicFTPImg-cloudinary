@@ -45,7 +45,32 @@ cloudinary.config({
  * Responds with { message, name }.
  */
 app.post('/api/upload/ftp', upload.single('file'), async (req, res) => {
-   return res.status(400).json({ error: 'No file provided' });
+  console.log("req.body: ", req.body);
+  console.log("req.file: ", req.file);
+
+  if(!req.file) return res.status(400).json({ error: 'No file provided' });
+  
+  const ftpClient = new Client()
+  try{
+    await ftpClient.access({
+    host: "localhost",
+    port: 21,
+    user: "tester",
+    password: "password",
+    secure: true
+  })
+    //ftpClient.ftp.verbose = true
+    //await ftpClient.ensureDir("/")
+    await ftpClient.uploadFrom(Readable.from(req.file.buffer), path.basename(req.file.originalname))
+    //await ftpClient.close()
+    
+    return res.status(201).json({message: "Upload to FTP"})
+  
+  } catch (error){
+    console.warn(error);
+    return res.status(500).json({error: "FTP upload failed: " + error})
+  }
+
 
 });
 
