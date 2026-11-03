@@ -53,11 +53,11 @@ app.post('/api/upload/ftp', upload.single('file'), async (req, res) => {
   const ftpClient = new Client()
   try{
     await ftpClient.access({
-    host: "localhost",
+    host: "192.168.56.1",
     port: 21,
     user: "tester",
     password: "password",
-    secure: true
+    secure: "true"
   })
     //ftpClient.ftp.verbose = true
     //await ftpClient.ensureDir("/")
