@@ -104,7 +104,7 @@ app.get('/api/files/ftp', async (_req, res) => {
   await client.access({
     host: "192.168.56.1",
     port: 21,
-    usert: "tester",
+    user: "tester",
     password: "password",
     secure: "true"
   })
