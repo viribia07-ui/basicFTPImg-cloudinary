@@ -30,6 +30,8 @@ export default function UploadPage() {
             title='Cloudinary Image Upload'
             icon={<FaCloud />}
             endpoint='http://localhost:5000/api/upload/cloudinary'
+            accept='image/*'
+            
           />
           <FileList
 

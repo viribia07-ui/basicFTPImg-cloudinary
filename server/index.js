@@ -79,9 +79,19 @@ app.post('/api/upload/ftp', upload.single('file'), async (req, res) => {
  * Accepts images only; responds with { message, url }.
  */
 app.post('/api/upload/cloudinary', upload.single('file'), async (req, res) => {
-   return res.status(400).json({ error: 'No file provided' });
-
-});
+  if(!req-file) return res.status(400).json({ error: 'No file provided' });
+  if(!req.file.mimetype.startsWith("image/")) return res.status(400).json({error: "Only images are allowed"})
+  
+  const dataUri = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}` //'base64' = 64bit
+  cloudinary.uploader.upload(dataUri, {resource_type: "image"},
+    (error, result)=>{
+      console.log("POST /api/upload/cloudinary result: ", result);
+      console.log("POST /api/upload/cloudinary error: ", error);
+      
+      return res.status(error? 500 : 201).json({error, result})
+    }
+  )
+  });
 
 /**
  * Connects and logs in an FTP client using FTP_* environment variables.
