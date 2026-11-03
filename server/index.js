@@ -1,0 +1,102 @@
+/**
+ * Upload API: accepts files and stores them on an FTP server or in Cloudinary,
+ * and exposes GET endpoints to list/download what was uploaded.
+ */
+
+// Loads variables from .env into process.env (side-effect import, must run first)
+import 'dotenv/config';
+// Web framework: routing and middleware
+import express from 'express';
+// Middleware that sets CORS headers so the browser client (other origin) can call the API
+import cors from 'cors';
+// Middleware that parses multipart/form-data uploads
+import multer from 'multer';
+// Used to turn an in-memory Buffer into a stream for FTP upload
+import { Readable } from 'stream';
+// Safe handling of file names (prevents path traversal)
+import path from 'path';
+// FTP client
+import { Client } from 'basic-ftp';
+// Cloudinary SDK (image hosting)
+import { v2 as cloudinary } from 'cloudinary';
+
+const app = express();
+
+// Multer middleware config: keep files in memory (req.file.buffer), cap size at 10 MB
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+});
+
+// Global middleware: only allow requests from the configured client origin
+app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173' }));
+
+// Credentials come from environment variables, never hard-coded
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+/**
+ * POST /api/upload/ftp
+ * `upload.single('file')` is route-level middleware: it parses the multipart body
+ * and exposes the "file" field as req.file before the handler runs.
+ * Responds with { message, name }.
+ */
+app.post('/api/upload/ftp', upload.single('file'), async (req, res) => {
+   return res.status(400).json({ error: 'No file provided' });
+
+});
+
+/**
+ * POST /api/upload/cloudinary
+ * Accepts images only; responds with { message, url }.
+ */
+app.post('/api/upload/cloudinary', upload.single('file'), async (req, res) => {
+   return res.status(400).json({ error: 'No file provided' });
+
+});
+
+/**
+ * Connects and logs in an FTP client using FTP_* environment variables.
+ * @param {Client} client basic-ftp client to connect
+ * @returns {Promise<import('basic-ftp').FTPResponse>}
+ */
+const ftpAccess = (client) =>
+  client.access({
+    host: process.env.FTP_HOST || 'localhost',
+    port: Number(process.env.FTP_PORT) || 21,
+    user: process.env.FTP_USER || 'anonymous',
+    password: process.env.FTP_PASSWORD || '',
+    secure: process.env.FTP_SECURE === 'true',
+  });
+
+/** GET /api/files/ftp - lists files in the FTP remote dir as [{ name, size }]. */
+app.get('/api/files/ftp', async (_req, res) => {
+
+    res.status(500).json({ error: 'FTP list failed: '  });
+
+});
+
+/** GET /api/files/ftp/:name - streams one FTP file to the response as a download. */
+app.get('/api/files/ftp/:name', async (req, res) => {
+ res.status(404).json({ error: 'FTP download failed: '  });
+
+});
+
+/** GET /api/files/cloudinary - lists up to 30 images as [{ name, url }]. */
+app.get('/api/files/cloudinary', async (_req, res) => {
+
+    res.status(500).json({ error: 'Cloudinary list failed: '  });
+
+});
+
+// Error-handling middleware (4 args, registered last): turns multer errors
+// (e.g. file too large) into 400 and anything else into 500.
+app.use((err, _req, res, _next) => {
+  res.status(err instanceof multer.MulterError ? 400 : 500).json({ error: err.message });
+});
+
+const port = process.env.PORT || 5000;
+app.listen(port, () => console.log(`Server listening on ${port}`));
