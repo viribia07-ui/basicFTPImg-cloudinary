@@ -131,14 +131,25 @@ app.get('/api/files/ftp', async (_req, res) => {
 
 /** GET /api/files/ftp/:name - streams one FTP file to the response as a download. */
 app.get('/api/files/ftp/:name', async (req, res) => {
- res.status(404).json({ error: 'FTP download failed: '  });
+ res.status(404).json({ error: 'FTP download failed: '});
 
 });
 
 /** GET /api/files/cloudinary - lists up to 30 images as [{ name, url }]. */
 app.get('/api/files/cloudinary', async (_req, res) => {
-
-    res.status(500).json({ error: 'Cloudinary list failed: '  });
+  const result = await cloudinary.api.resources({
+    type: 'upload',
+    resource_type: "image",
+    max_results: 30
+  })
+  if (result) {
+    return res.status(200).json({list: result.resources.map(r=>({
+      name: r.secure_url
+    }))
+  })
+  } else{
+    return res.status(500).json({ error: 'Cloudinary list failed: '});
+  }
 
 });
 
