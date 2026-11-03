@@ -53,7 +53,7 @@ app.post('/api/upload/ftp', upload.single('file'), async (req, res) => {
   const ftpClient = new Client()
   try{
     await ftpClient.access({
-    host: "192.168.56.1",
+    host: "192.168.56.1", 
     port: 21,
     user: "tester",
     password: "password",
@@ -79,7 +79,7 @@ app.post('/api/upload/ftp', upload.single('file'), async (req, res) => {
  * Accepts images only; responds with { message, url }.
  */
 app.post('/api/upload/cloudinary', upload.single('file'), async (req, res) => {
-  if(!req-file) return res.status(400).json({ error: 'No file provided' });
+  if(!req.file) return res.status(400).json({ error: 'No file provided' });
   if(!req.file.mimetype.startsWith("image/")) return res.status(400).json({error: "Only images are allowed"})
   
   const dataUri = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}` //'base64' = 64bit
