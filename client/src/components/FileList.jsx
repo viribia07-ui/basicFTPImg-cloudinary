@@ -15,7 +15,11 @@ export default function FileList({ title, endpoint, refreshKey, imageOnly }) {
 
   useEffect(()=>{
     fetch(endpoint)
-    .then(console.log)
+    .then(res=>res.json())
+    .then(res=>{
+      console.log(`GET ${endpoint} res: `, res)
+      setFiles(res.list)
+    })
     .catch(console.warn)
   }, [endpoint])
 
@@ -24,7 +28,8 @@ export default function FileList({ title, endpoint, refreshKey, imageOnly }) {
       <h2>{title}</h2>
       <ul className='file-list'>
         {files.map(file => <li key={file}>
-          {file}
+          {/**TODO-clickable links show content */}
+          {file.name}
         </li>)}
       </ul>
     </section>
